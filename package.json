@@ -1,0 +1,27 @@
+{
+  "name": "model-me",
+  "version": "0.0.1",
+  "description": "Very simplistic Node model.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:t3hpr1m3/model-me.git"
+  },
+  "author": "t3hpr1m3 <t3hpr1m3@codingprime.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/t3hpr1m3/model-me/issues"
+  },
+  "homepage": "https://github.com/t3hpr1m3/model-me",
+  "dependencies": {
+    "tv4": "^1.1.9"
+  },
+  "devDependencies": {
+    "chai": "^2.1.2",
+    "gulp-jslint": "^0.2.2",
+    "mocha": "^2.2.1"
+  }
+}
