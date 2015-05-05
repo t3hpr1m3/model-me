@@ -21,11 +21,11 @@ var ModelMe = exports = module.exports = function(fn) {
         var self = this;
         var result = tv4.validateMultiple(this.attributes, this.constructor.schema);
         if (result.valid) {
-          return cb(null);
+          return cb(null, self);
         } else {
           this.handleErrors(result.errors);
           var err = new ValidationError('Validation Failed', this.errors);
-          return cb(err);
+          return cb(err, self);
         }
       },
       enumerable: true,

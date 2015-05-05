@@ -76,27 +76,35 @@ describe('ModelMe', function() {
 
   describe('validation', function() {
 
+    function Thing(data) {}
+    ModelMe(Thing)
+      .attr('name', String, { required: true });
+
     it('validates required attributes', function(done) {
-      function Thing(data) {}
-      ModelMe(Thing)
-        .attr('attr1', String, { required: true });
       var tester = new Thing();
       tester.validate(function(err) {
         expect(err).to.be.instanceof(ModelMe.ValidationError);
-        expect(err.errors).to.include.property('attr1', 'is required.');
+        expect(err.errors).to.include.property('name', 'is required.');
         done();
       });
     });
 
     it('rejects invalid values', function(done) {
-      function Thing(data) {}
-      ModelMe(Thing)
-        .attr('name', String, { required: true });
       var tester = new Thing();
       tester.name = 1;
       tester.validate(function(err) {
         expect(err).to.be.instanceof(ModelMe.ValidationError);
         expect(err.errors).to.include.property('name').that.contains('Invalid type');
+        done();
+      });
+    });
+
+    it('returns the validated object', function(done) {
+      var tester = new Thing();
+      tester.name = 'barbara Streisand';
+      tester.validate(function(err, obj) {
+        if (err) { return done(err); }
+        expect(obj).to.be.instanceof(Thing);
         done();
       });
     });
