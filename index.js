@@ -19,7 +19,7 @@ var ModelMe = exports = module.exports = function(fn) {
     validate: {
       value: function(cb) {
         var self = this;
-        var result = tv4.validateMultiple(this, this.constructor.schema);
+        var result = tv4.validateMultiple(this.attributes, this.constructor.schema);
         if (result.valid) {
           return cb(null);
         } else {
@@ -61,7 +61,7 @@ var ModelMe = exports = module.exports = function(fn) {
           if (this.errors[attr] && code != tv4.errorCodes.OBJECT_REQUIRED) {
             return;
           }
-          this.errors[attr] = this.constructor.getMessage(code, options);
+          this.errors[attr] = this.constructor.getMessage(err, options);
         }
 
         for (var i = 0; i < errors.length; i++) {
@@ -69,11 +69,11 @@ var ModelMe = exports = module.exports = function(fn) {
           switch(err.code) {
             case tv4.errorCodes.INVALID_TYPE:
               attr = err.schemaPath.split('/')[2];
-              addError.call(this, err.code);
+              addError.call(this, err);
               break;
             case tv4.errorCodes.OBJECT_REQUIRED:
               attr = this.constructor.schema.required[err.schemaPath.split('/')[2]];
-              addError.call(this, err.code);
+              addError.call(this, err);
               break;
           }
         }
@@ -82,6 +82,8 @@ var ModelMe = exports = module.exports = function(fn) {
   };
 
   var _schema = {
+    type: 'object',
+    properties: {},
     required: []
   };
   var fnName = fn.name;
@@ -114,7 +116,7 @@ var ModelMe = exports = module.exports = function(fn) {
             jsonType = 'object';
             break;
         }
-        fn.schema[name] = {
+        fn.schema.properties[name] = {
           type: jsonType
         };
         if (opts.required) {
@@ -143,10 +145,12 @@ var ModelMe = exports = module.exports = function(fn) {
       enumerable: true
     },
     getMessage: {
-      value: function(code) {
-        switch(code) {
-          case tv4.errorCodes.INVALID_TYPE:
+      value: function(err) {
+        switch(err.code) {
+          case tv4.errorCodes.OBJECT_REQUIRED:
             return 'is required.';
+          case tv4.errorCodes.INVALID_TYPE:
+            return err.message.replace('ValidationError: ', '');
           default:
             return 'Oops.';
         }

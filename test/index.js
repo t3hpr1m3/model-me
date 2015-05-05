@@ -42,7 +42,7 @@ describe('ModelMe', function() {
       ModelMe(Thing)
         .attr('name', String);
 
-      expect(Thing.schema).to.have.property('name');
+      expect(Thing.schema.properties).to.have.property('name');
     });
 
     it('sets up validations', function() {
@@ -52,17 +52,6 @@ describe('ModelMe', function() {
         .attr('name', String, { required: true });
 
       expect(Thing.schema.required).to.include('name');
-    });
-  });
-
-  it('validates required attrs', function(done) {
-    function Thing(data) {}
-    ModelMe(Thing)
-      .attr('name', String, { required: true });
-    var tester = new Thing();
-    tester.validate(function(err) {
-      expect(err).to.be.instanceof(ModelMe.ValidationError);
-      done();
     });
   });
 
@@ -83,5 +72,33 @@ describe('ModelMe', function() {
     var tester2 = new Thing();
     tester1.name = 'Barbara Streisand';
     expect(tester2.name).to.be.undefined;
+  });
+
+  describe('validation', function() {
+
+    it('validates required attributes', function(done) {
+      function Thing(data) {}
+      ModelMe(Thing)
+        .attr('attr1', String, { required: true });
+      var tester = new Thing();
+      tester.validate(function(err) {
+        expect(err).to.be.instanceof(ModelMe.ValidationError);
+        expect(err.errors).to.include.property('attr1', 'is required.');
+        done();
+      });
+    });
+
+    it('rejects invalid values', function(done) {
+      function Thing(data) {}
+      ModelMe(Thing)
+        .attr('name', String, { required: true });
+      var tester = new Thing();
+      tester.name = 1;
+      tester.validate(function(err) {
+        expect(err).to.be.instanceof(ModelMe.ValidationError);
+        expect(err.errors).to.include.property('name').that.contains('Invalid type');
+        done();
+      });
+    });
   });
 });
