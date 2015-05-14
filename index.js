@@ -1,3 +1,5 @@
+'use strict';
+
 var Validations = require('./lib/validations'),
     tv4 = require('tv4'),
     util = require('util');
@@ -14,7 +16,7 @@ var ValidationError = function ValidationError(message, errors) {
 };
 util.inherits(ValidationError, ModelMeError);
 
-var ModelMe = exports = module.exports = function(fn) {
+function ModelMe(fn) {
   var proto = {
     validate: {
       value: function(cb) {
@@ -55,13 +57,14 @@ var ModelMe = exports = module.exports = function(fn) {
       value: function(errors) {
         var err,
             attr;
-        this.errors = {};
+        var self = this;
+        self.errors = {};
 
         function addError(code, options) {
-          if (this.errors[attr] && code != tv4.errorCodes.OBJECT_REQUIRED) {
+          if (self.errors[attr] && code != tv4.errorCodes.OBJECT_REQUIRED) {
             return;
           }
-          this.errors[attr] = this.constructor.getMessage(err, options);
+          self.errors[attr] = self.constructor.getMessage(err, options);
         }
 
         for (var i = 0; i < errors.length; i++) {
@@ -161,8 +164,9 @@ var ModelMe = exports = module.exports = function(fn) {
   fn.prototype = Object.create(fn.prototype || {}, proto);
 
   return fn;
-};
+}
 
 ModelMe.Validations = Validations;
 ModelMe.ValidationError = ValidationError;
 
+exports = module.exports = ModelMe;

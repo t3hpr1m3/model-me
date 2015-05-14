@@ -1,3 +1,4 @@
+/*jshint expr: true*/
 var chai = require('chai'),
     expect = chai.expect,
     ModelMe = require('../index'),
@@ -91,7 +92,7 @@ describe('ModelMe', function() {
 
     it('rejects invalid values', function(done) {
       var tester = new Thing();
-      tester.name = 1;
+      tester.name = { value: 'notastring' };
       tester.validate(function(err) {
         expect(err).to.be.instanceof(ModelMe.ValidationError);
         expect(err.errors).to.include.property('name').that.contains('Invalid type');
