@@ -32,7 +32,7 @@ describe('ModelMe', function() {
       expect(tester).to.have.property(method);
     });
 
-    ['validate'].forEach(function(method) {
+    ['validate', 'toJSON'].forEach(function(method) {
       expect(Thing).to.respondTo(method);
     });
   });
@@ -108,6 +108,20 @@ describe('ModelMe', function() {
         expect(obj).to.be.instanceof(Thing);
         done();
       });
+    });
+  });
+
+  describe('#toJSON', function() {
+
+    function Thing(data) {}
+
+    ModelMe(Thing)
+      .attr('name', String);
+
+    it('contains only attributes', function() {
+      var thing = new Thing();
+      thing.name = 'Barbara Streisand';
+      expect(thing.toJSON()).to.have.all.keys('name');
     });
   });
 });

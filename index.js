@@ -81,6 +81,18 @@ function ModelMe(fn) {
           }
         }
       }
+    },
+    toJSON: {
+      value: function() {
+        var json = {};
+        var data = this.attributes || {};
+        for (var key in data) {
+          var value = data[key];
+          if (value) { json[key] = value; }
+        }
+        return json;
+      },
+      writable: true
     }
   };
 
