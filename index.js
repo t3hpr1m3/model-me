@@ -1,8 +1,12 @@
 'use strict';
 
-var Validations = require('./lib/validations'),
+var extend = require('extend'),
+    formats = require('tv4-formats'),
+    util = require('util'),
     tv4 = require('tv4'),
-    util = require('util');
+    Validations = require('./lib/validations');
+
+tv4.addFormat(formats);
 
 var ModelMeError = function ModelMeError(message, name) {
   ModelMeError.super_.call(message);
@@ -17,6 +21,10 @@ var ValidationError = function ValidationError(message, errors) {
 util.inherits(ValidationError, ModelMeError);
 
 function ModelMe(fn) {
+  var _schema = null,
+      _attributes = {},
+      fnName = fn.name;
+
   var proto = {
     validate: {
       value: function(cb) {
@@ -61,9 +69,9 @@ function ModelMe(fn) {
         self.errors = {};
 
         function addError(code, options) {
-          if (self.errors[attr] && code != tv4.errorCodes.OBJECT_REQUIRED) {
-            return;
-          }
+          // if (self.errors[attr] && code != tv4.errorCodes.OBJECT_REQUIRED) {
+          //   return;
+          // }
           self.errors[attr] = self.constructor.getMessage(err, options);
         }
 
@@ -96,47 +104,48 @@ function ModelMe(fn) {
     }
   };
 
-  var _schema = {
-    type: 'object',
-    properties: {},
-    required: []
-  };
-  var fnName = fn.name;
-
   Object.defineProperties(fn, {
     schema: {
       get: function() {
+        if (!_schema) {
+          _schema = {
+            type: 'object',
+            properties: {},
+            required: []
+          };
+
+          Object.keys(_attributes).forEach(function(name) {
+            var attribute = _attributes[name];
+            attribute.validators.forEach(function(v) {
+              v.add(_schema);
+            });
+          });
+        }
         return _schema;
+      },
+      enumerable: true
+    },
+    attributes: {
+      get: function() {
+        return _attributes;
       },
       enumerable: true
     },
     attr: {
       value: function(name, type, options) {
-        var jsonType;
-        var opts = options || {};
-        switch(type) {
-          case String:
-            jsonType = 'string';
-            break;
-          case Array:
-            jsonType = 'array';
-            break;
-          case Number:
-            jsonType = 'number';
-            break;
-          case Boolean:
-            jsonType = 'boolean';
-            break;
-          default:
-            jsonType = 'object';
-            break;
-        }
-        fn.schema.properties[name] = {
-          type: jsonType
+        var attribute = {
+          type: type,
+          validators: [],
+          options: extend({ required: false, allowNull: true }, options || {})
         };
-        if (opts.required) {
-          (new Validations.RequiredValidator(name)).add(fn.schema);
+
+        attribute.validators.push(new Validations.TypeValidator(name, attribute));
+        if (attribute.options.required) {
+          attribute.validators.push(new Validations.RequiredValidator(name, attribute));
         }
+
+        _attributes[name] = attribute;
+
         Object.defineProperty(fn.prototype, name, {
           get: function() { return this.attributes[name]; },
           set: function(value) { this.attributes[name] = value; }
