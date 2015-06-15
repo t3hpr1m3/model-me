@@ -1,6 +1,6 @@
 {
   "name": "model-me",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Very simplistic Node model.",
   "main": "index.js",
   "scripts": {
