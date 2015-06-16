@@ -148,7 +148,8 @@ function ModelMe(fn) {
 
         Object.defineProperty(fn.prototype, name, {
           get: function() { return this.attributes[name]; },
-          set: function(value) { this.attributes[name] = value; }
+          set: function(value) { this.attributes[name] = value; },
+          enumerable: true
         });
         return fn;
       },
